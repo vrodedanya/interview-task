@@ -1,22 +1,95 @@
 #include "server.h"
 
-void sigchld_handler(int s)
+Server::Server(const char* port)
 {
-	while(waitpid(-1, NULL, WNOHANG) > 0);
+	this->port = new char[strlen(port)];
+	strcpy(this->port,port);
 }
 
 void* sock_addr(sockaddr *sa)
 {
-	if (sa->sa_family == AF_INET) 
-	{
-		return &(((sockaddr_in*)sa)->sin_addr);
-	}
-
-	return &(((sockaddr_in6*)sa)->sin6_addr);
+	return &(((sockaddr_in*)sa)->sin_addr);
 }
 
-void Server::open(const char* port)
+void read_fromSock(int& accept_socket)
 {
+	unsigned char first_byte = '0';
+	if (recv(accept_socket, &first_byte, 1, 0) == -1)
+	{
+		std::cerr << "[SERVER]: Receiving message error" << std::endl;
+	}
+	int length = 0;
+	if ((first_byte & 128) == 128)
+	{
+		length = (first_byte & 127);
+		std::cout << "[SERVER]: Bytes count: " << length << std::endl;
+		unsigned char* buf = new unsigned char[length + 1];
+		buf[0] = first_byte;
+		for (int i = 1 ; i < length + 1 ; i++)
+		{
+			if (recv(accept_socket, &buf[i], 1, 0) == -1)
+			{
+				std::cerr << "[SERVER]: Receiving message error" << std::endl;
+			}
+		}
+		length = CL::decode_length(buf);
+		delete[] buf;	
+	}
+	else
+	{
+		length = CL::decode_length(&first_byte);
+	}
+
+	std::cout << "[SERVER]: Message length: " << length << std::endl;
+	std::cout << std::endl;
+	int n = 0;
+	int buf;
+	for (int i = 0 ; i < length ; i++)
+	{
+		if ((buf = recv(accept_socket, &first_byte, 1, 0)) == -1)
+		{
+			std::cerr << "[SERVER]: Receiving message error" << std::endl;
+		}
+		n += buf;
+		std::cout << first_byte;
+	}
+	std::cout << std::endl;
+	std::cout << "[SERVER]: Recieved " << n << " out of " << length << std::endl;
+	std::cout << "[SERVER]: Bytes lost: " << length - n << std::endl;
+
+	close(accept_socket);
+}
+
+void command_parser()
+{
+	while (1)
+	{
+		std::cout << "[user]: ";
+		std::string buf;
+		std::cin >> buf;
+		if (buf == "exit")
+		{
+			exit(0);
+		}
+		else if (buf == "clear")
+		{
+			system("clear");
+		}
+		else if (buf == "help")
+		{
+			std::cout << "\tclear" << std::endl;
+			std::cout << "\texit" << std::endl;
+		}
+		else
+		{
+			std::cout << "[SERVER]: Command '" << buf << "' doesn't exist! Try 'help' to see available commands" << std::endl; 
+		}
+	}
+}
+
+void Server::open()
+{
+// Initializing
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
@@ -39,7 +112,7 @@ void Server::open(const char* port)
 		
 		if (setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) 
 		{
-			std::cerr << "setsockopt error" << std::endl;
+			std::cerr << "[SERVER]: setsockopt error" << std::endl;
 			exit(1);
 		}
 		
@@ -53,7 +126,7 @@ void Server::open(const char* port)
 	}
 	if (p == NULL)
 	{
-		std::cerr << "Server failed" << std::endl;
+		std::cerr << "[SERVER]: starting failed" << std::endl;
 		exit(1);
 	}
 
@@ -64,19 +137,12 @@ void Server::list(const unsigned int& backlog)
 {
 	if (listen(listen_socket, backlog) == -1)
 	{
-		std::cerr << "listen error" << std::endl;
+		std::cerr << "[SERVER]: listen error" << std::endl;
 		exit (1);
 	}
 	socklen_t sin_size;
 
-	sa.sa_handler = sigchld_handler; 
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_RESTART;
-	if (sigaction(SIGCHLD, &sa, NULL) == -1) 
-	{
-		std::cerr << "sigaction" << std::endl;
-		exit(1);
-	}
+	std::thread parser(command_parser);
 
 	while (1)
 	{
@@ -86,20 +152,14 @@ void Server::list(const unsigned int& backlog)
 		{
 			continue;
 		}
-		char s[INET_ADDRSTRLEN];
-		inet_ntop(client.ai_family, sock_addr((sockaddr *)&client), s, sizeof(s));
-		std::cout << "server: got connection from " << s << std::endl;
-		if (!fork()) 
-		{ 
-			close(listen_socket); 
-			if (send(accept_socket, "Hello, world!", 13, 0) == -1)
-			{
-				std::cerr << "sending message error" << std::endl;
-			}
-			close(accept_socket);
-			exit(0);
-		}
-		close(accept_socket); 
+
+		std::cout << "\n[SERVER]: got connection" << std::endl;
+	
+		std::thread handler(read_fromSock, std::ref(accept_socket));
+		handler.detach();
+
 	}
+	close(listen_socket);
+	parser.join();
 }
 

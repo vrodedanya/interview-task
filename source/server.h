@@ -3,15 +3,15 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/wait.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <arpa/inet.h>
+
 #include <cstring>
 #include <iostream>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/wait.h>
-#include <signal.h>
+#include <thread>
+#include <string>
+#include "code.h"
 
 class Server
 {
@@ -21,12 +21,16 @@ private:
 	addrinfo client;
 	int listen_socket, accept_socket;
 	int yes = 1;
-	struct sigaction sa;
+	char* port;
 public:
+	Server(const char* port);
 
-	void open(const char* port);
+	void open();
 
 	void list(const unsigned int& backlog);
+
 };
 
+void command_parser();
+void read_fromSock(int& accept_socket);
 #endif

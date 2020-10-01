@@ -1,10 +1,16 @@
 #include "server.h"
 
-int main()
+int main(int argc, char** argv)
 {
-	Server server;
-	server.open("2000");
-	server.list(5);
-
+	if (argc == 2)
+	{
+		Server server(argv[1]);
+		server.open();
+		server.list(5);
+	}
+	else
+	{
+		std::cerr << "Format: server <port>" << std::endl;
+	}
 	return 0;
 }

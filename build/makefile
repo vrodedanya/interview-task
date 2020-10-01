@@ -47,15 +47,17 @@ VPATH:=$(SRC)
 all: $(OBJ_FILES) 
 	$(CC) $^ $(LIBS) $(LDFLAGS) -o $(NAME)
 
-server: $(SRC)/server.cpp $(SRC)/server.h $(SRC)/mserver.cpp
-	g++ -c $(SRC)/server.cpp -Wall -g3 -O0
+server: $(SRC)/server.cpp $(SRC)/server.h $(SRC)/mserver.cpp $(SRC)/code.h $(SRC)/code.cpp
+	g++ -c $(SRC)/server.cpp -pthread -Wall -g3 -O0
 	g++ -c $(SRC)/mserver.cpp -Wall -g3 -O0
-	g++ server.o mserver.o -o server
+	g++ -c $(SRC)/code.cpp -Wall -g3 -O0
+	g++ -pthread server.o mserver.o code.o -o server
 
-client: $(SRC)/client.cpp $(SRC)/client.h $(SRC)/mclient.cpp
+client: $(SRC)/client.cpp $(SRC)/client.h $(SRC)/mclient.cpp $(SRC)/code.h $(SRC)/code.cpp
 	g++ -c $(SRC)/client.cpp -Wall -g3 -O0
 	g++ -c $(SRC)/mclient.cpp -Wall -g3 -O0
-	g++ mclient.o client.o -o client
+	g++ -c $(SRC)/code.cpp -Wall -g3 -O0
+	g++ mclient.o client.o code.o -o client
 
 static_library: $(filter-out main.o, $(OBJ_FILES))
 	ar cr lib$(NAME).a $^

@@ -3,14 +3,14 @@
 
 int main(int argc, char** argv)
 {
-	if (argc == 3)
+	if (argc == 4)
 	{
 		Client client;
-		client.con(argv[1], argv[2]);
+		client.con(argv[1], argv[2], argv[3]);
 	}
 	else
 	{	
-		std::cout << "Format: client <ip> <port>" << std::endl;
+		std::cout << "Format: client <ip> <port> <file_name>" << std::endl;
 	}
 	return 0;
 }
