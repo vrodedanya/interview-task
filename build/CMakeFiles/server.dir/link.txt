@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/server.dir/home/danil/IT/cpp/task/source/mserver.cpp.o CMakeFiles/server.dir/home/danil/IT/cpp/task/source/server.cpp.o CMakeFiles/server.dir/home/danil/IT/cpp/task/source/code.cpp.o -o server 
