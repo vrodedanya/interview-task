@@ -2,6 +2,9 @@
 #include <string>
 #include <bitset>
 #include "code.h"
+#include <ace/SOCK_Acceptor.h>
+#include <ace/SOCK_Stream.h>
+
 
 int main(int argc, char** argv)
 {

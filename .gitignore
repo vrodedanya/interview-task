@@ -1,2 +1,4 @@
 *.[od]
 build/test
+build/client
+build/server
