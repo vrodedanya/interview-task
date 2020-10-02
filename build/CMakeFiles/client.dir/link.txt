@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/client.dir/home/danil/IT/cpp/task/source/mclient.cpp.o CMakeFiles/client.dir/home/danil/IT/cpp/task/source/client.cpp.o CMakeFiles/client.dir/home/danil/IT/cpp/task/source/code.cpp.o -o client 

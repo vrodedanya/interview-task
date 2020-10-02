@@ -1,4 +1,0 @@
-/home/danil/IT/cpp/task/build/CMakeFiles/rebuild_cache.dir
-/home/danil/IT/cpp/task/build/CMakeFiles/edit_cache.dir
-/home/danil/IT/cpp/task/build/CMakeFiles/client.dir
-/home/danil/IT/cpp/task/build/CMakeFiles/server.dir
