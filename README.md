@@ -1,7 +1,7 @@
 # Task
 
 # Build
-1. In build directory execute:
+1. Create build directory and execute there this:
 `cmake ..`
 2. Now execute:
 `make server` for build server
